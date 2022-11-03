@@ -10,6 +10,7 @@ import 'package:html_editor_enhanced/utils/toolbar_icon.dart';
 // ignore: avoid_web_libraries_in_flutter
 import 'dart:html' as html;
 import 'dart:ui' as ui;
+import 'dart:async';
 
 class HtmlEditorWidget extends StatefulWidget {
   HtmlEditorWidget({
@@ -40,6 +41,8 @@ class HtmlEditorWidget extends StatefulWidget {
 
 class _HtmlEditorWidgetWebState extends State<HtmlEditorWidget> {
   final String createdViewId = 'html_editor_web';
+
+  StreamSubscription subscription;
   
   @override
   void initState() {
@@ -66,6 +69,7 @@ class _HtmlEditorWidgetWebState extends State<HtmlEditorWidget> {
         <script src="assets/packages/html_editor_enhanced/assets/jquery-3.4.1.slim.min.js" type="application/javascript"></script>
         <link href="assets/packages/html_editor_enhanced/assets/summernote-lite.min.css" rel="stylesheet">
         <script src="assets/packages/html_editor_enhanced/assets/summernote-lite.min.js" type="application/javascript"></script>
+        <script src="assets/packages/html_editor_enhanced/assets/summernote-ja-JP.js" type="application/javascript"></script>
         $darkCSS
       </head>
       <body>
@@ -78,10 +82,11 @@ class _HtmlEditorWidgetWebState extends State<HtmlEditorWidget> {
           maxHeight: ${widget.height - 125},
           toolbar: $summernoteToolbar
           disableGrammar: false,
-          spellCheck: false
+          spellCheck: false,
+          lang: 'ja-JP'
         });
        
-        window.parent.addEventListener('message', handleMessage, false);
+        window.addEventListener('message', handleMessage, false);
       
         function handleMessage(e) {
           if (e.data.includes("toIframe:")) {
@@ -139,8 +144,8 @@ class _HtmlEditorWidgetWebState extends State<HtmlEditorWidget> {
             if (data["type"].includes("reload")) {
               window.location.reload();
             }
+            }
           }
-        }
         
         $jsCallbacks
       </script>
@@ -289,7 +294,7 @@ class _HtmlEditorWidgetWebState extends State<HtmlEditorWidget> {
   }
 
   void addJSListener() {
-    html.window.onMessage.listen((event) {
+    subscription = html.window.onMessage.listen((event) {
       var data = json.decode(event.data);
       if (data["type"].contains("toDart:")) {
         if (data["type"].contains("onChange")) {
@@ -318,5 +323,13 @@ class _HtmlEditorWidgetWebState extends State<HtmlEditorWidget> {
         }
       }
     });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    if (subscription != null) {
+      subscription.cancel();
+    }
   }
 }

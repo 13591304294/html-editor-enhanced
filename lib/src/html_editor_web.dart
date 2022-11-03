@@ -95,15 +95,15 @@ class HtmlEditor extends StatelessWidget implements HtmlEditorImpl {
   /// Sets the text of the editor. Some pre-processing is applied to convert
   /// [String] elements like "\n" to HTML elements.
   static void setText(String text) {
-    String txtIsi = text
-        .replaceAll("'", '\\"')
-        .replaceAll('"', '\\"')
-        .replaceAll("[", "\\[")
-        .replaceAll("]", "\\]")
-        .replaceAll("\n", "<br/>")
-        .replaceAll("\n\n", "<br/>")
-        .replaceAll("\r", " ")
-        .replaceAll('\r\n', " ");
+    String txtIsi = text;
+        // .replaceAll("'", '\\"')
+        // .replaceAll('"', '\\"')
+        // .replaceAll("[", "\\[")
+        // .replaceAll("]", "\\]")
+        // .replaceAll("\n", "<br/>")
+        // .replaceAll("\n\n", "<br/>")
+        // .replaceAll("\r", " ")
+        // .replaceAll('\r\n', " ");
     evaluateJavascriptWeb(data: {"type": "toIframe: setText", "text": txtIsi});
   }
 
@@ -219,7 +219,12 @@ class HtmlEditor extends StatelessWidget implements HtmlEditorImpl {
     if (kIsWeb) {
       final jsonEncoder = JsonEncoder();
       var json = jsonEncoder.convert(data);
-      html.window.postMessage(json, "*");
+      html.document.querySelectorAll("flt-platform-view").forEach((element) {
+        var iframe = element.shadowRoot.querySelector("iframe");
+        if (iframe != null) {
+          (iframe as IFrameElement).contentWindow.postMessage(json, "*");
+        }
+      });
     } else {
       throw Exception("Non-Flutter Web environment detected, please make sure you are importing package:html_editor_enhanced/html_editor.dart");
     }
