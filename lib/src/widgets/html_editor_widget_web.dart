@@ -237,6 +237,22 @@ class _HtmlEditorWidgetWebState extends State<HtmlEditorWidget> {
     if (widget.callbacks.onChange != null) {
       callbacks = callbacks + """
           \$('#summernote-2').on('summernote.change', function(_, contents, \$editable) {
+            if (typeof contents == "string" && contents.indexOf(" color=") != -1) {
+              try {
+                let parser = new DOMParser();
+                let doc = parser.parseFromString("<t id='textBody'>" + contents + "</t>", "text/html");
+                let elementList = doc.querySelectorAll("*[color]");
+                elementList.forEach((element) => {
+                  let color = element.getAttribute("color");
+                  element.removeAttribute("color");
+                  element.style.color = color;
+                });
+                \$('#summernote-2').summernote('code', doc.getElementById('textBody').innerHTML);
+                return;
+              } catch(e){
+                console.error(e);
+              }
+            }
             window.parent.postMessage(JSON.stringify({"type": "toDart: onChange", "contents": contents}), "*");
           });\n
         """;
