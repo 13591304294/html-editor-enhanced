@@ -1467,3 +1467,11 @@ a.note-dropdown-item,a.note-dropdown-item:hover {
   margin-bottom: 5px;
   display: inline-block;
 }
+
+.sn-checkbox-use-protocol {
+  display: none;
+}
+
+.sn-checkbox-open-in-new-window {
+  display: none;
+}
